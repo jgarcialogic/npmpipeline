@@ -18,7 +18,7 @@ steps:
 
 - task: SSH@0
   inputs:
-    sshEndpoint: '4.233.109.9'  # Nombre del endpoint SSH creado previamente
+    sshEndpoint: '4.233.109.9'
     runOptions: 'inline'
     inline: |
       # Buscar el PID del proceso
@@ -33,4 +33,5 @@ steps:
       fi
       
       cd /var/www/vhosts/logicsolutions.es/test.logicsolutions.es/logic-solutions-web/ && git pull && npm start  # Comandos a ejecutar en la máquina remota
+    readyTimeout: '20000'
   displayName: 'SSH to machine, kill process, git pull & npm start'
