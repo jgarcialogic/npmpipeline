@@ -1,0 +1,36 @@
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- task: NodeTool@0
+  inputs:
+    versionSpec: '18.14.1'
+  displayName: 'Install Node.js'
+
+- script: |
+    npm install -g npm@9.5.0
+    npm install
+    npm run build
+  displayName: 'npm install and build'
+
+- task: SSH@0
+  inputs:
+    sshEndpoint: '4.233.109.9'  # Nombre del endpoint SSH creado previamente
+    runOptions: 'inline'
+    inline: |
+      # Buscar el PID del proceso
+      pid=$(ps aux | grep "node /var/www/vhosts/logicsolutions.es/test.logicsolutions.es/logic-solutions-web/node_modules/.bin/next start -p 3001" | awk '{print $2}')
+      
+      if [ -z "$pid" ]; then
+        echo "El proceso no está en ejecución"
+      else
+        # Matar el proceso
+        sudo kill $pid
+        echo "Proceso con PID $pid detenido"
+      fi
+      
+      cd /var/www/vhosts/logicsolutions.es/test.logicsolutions.es/logic-solutions-web/ && git pull && npm start  # Comandos a ejecutar en la máquina remota
+  displayName: 'SSH to machine, kill process, git pull & npm start'
